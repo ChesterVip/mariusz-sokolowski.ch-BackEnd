@@ -19,6 +19,9 @@ async function bootstrap() {
   const fallbackOrigins = Array.from(
     new Set([
       'https://mariusz-sokolowski.ch',
+      'https://www.mariusz-sokolowski.ch',
+      'https://mariusz-sokolowski.netlify.app',
+      'https://mariusz-sokolowski.vercel.app',
       'http://localhost:5173',
       'http://localhost:5173/',
       'http://127.0.0.1:5173',
