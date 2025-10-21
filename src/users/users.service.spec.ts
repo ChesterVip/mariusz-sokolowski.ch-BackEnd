@@ -41,11 +41,17 @@ describe('UsersService', () => {
 
   it('creates a user when email is not taken', async () => {
     repository.findOne.mockResolvedValue(null)
-    repository.create.mockImplementation((entity) => entity as User)
-    repository.save.mockImplementation(async (entity) => ({
-      ...entity,
+    const createdUser = {
+      email: 'user@example.com',
+      firstName: 'Jan',
+      lastName: 'Kowalski',
+      preferredLanguage: undefined
+    } as User
+    repository.create.mockReturnValue(createdUser)
+    repository.save.mockResolvedValue({
+      ...createdUser,
       id: 'user-id'
-    }))
+    } as User)
 
     const result = await service.create(createDto('USER@example.com'))
 

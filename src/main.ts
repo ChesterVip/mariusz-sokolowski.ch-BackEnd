@@ -11,16 +11,28 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
 
-  const allowedOrigins = (configService.get<string>('ALLOWED_ORIGINS') ?? '')
+  const configuredOrigins = (configService.get<string>('ALLOWED_ORIGINS') ?? '')
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
 
-  const whitelistedOrigins =
-    allowedOrigins.length > 0 ? allowedOrigins : ['https://mariusz-sokolowski.ch'];
+  const fallbackOrigins = Array.from(
+    new Set([
+      'https://mariusz-sokolowski.ch',
+      'http://localhost:5173',
+      'http://localhost:5173/',
+      'http://127.0.0.1:5173',
+      'http://127.0.0.1:5173/',
+    ]),
+  );
+
+  const whitelistedOrigins = configuredOrigins.length > 0 ? configuredOrigins : fallbackOrigins;
 
   app.enableCors({
-    origin: (origin, callback) => {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
       if (!origin) {
         return callback(null, true);
       }

@@ -4,11 +4,12 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
-import { MailModule } from './mail/mail.module';
-import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { ContactModule } from './contact/contact.module';
+import { MailModule } from './mail/mail.module';
 import { SecureModule } from './secure/secure.module';
 import { HealthModule } from './health/health.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { HealthModule } from './health/health.module';
     AuthModule,
     SecureModule,
     HealthModule,
+    ContactModule,
   ],
   controllers: [],
   providers: [

@@ -11,10 +11,10 @@ import { LoginToken } from '../../auth/entities/login-token.entity';
 @Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ unique: true })
-  email: string;
+  email!: string;
 
   @Column({ nullable: true })
   firstName?: string;
@@ -26,10 +26,10 @@ export class User {
   preferredLanguage?: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @OneToMany(() => LoginToken, (token) => token.user)
   loginTokens?: LoginToken[];

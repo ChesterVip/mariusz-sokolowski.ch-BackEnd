@@ -16,8 +16,10 @@ export class UsersService {
   ) {}
 
   async create(dto: CreateUserDto): Promise<User> {
+    const normalizedEmail = dto.email.trim().toLowerCase();
+
     const existing = await this.usersRepository.findOne({
-      where: { email: dto.email.toLowerCase() },
+      where: { email: normalizedEmail },
     });
 
     if (existing) {
@@ -25,18 +27,20 @@ export class UsersService {
     }
 
     const user = this.usersRepository.create({
-      email: dto.email.toLowerCase(),
-      firstName: dto.firstName,
-      lastName: dto.lastName,
-      preferredLanguage: dto.preferredLanguage,
+      email: normalizedEmail,
+      firstName: dto.firstName?.trim(),
+      lastName: dto.lastName?.trim(),
+      preferredLanguage: dto.preferredLanguage?.trim(),
     });
 
     return this.usersRepository.save(user);
   }
 
   async findByEmail(email: string): Promise<User> {
+    const normalizedEmail = email.trim().toLowerCase();
+
     const user = await this.usersRepository.findOne({
-      where: { email: email.toLowerCase() },
+      where: { email: normalizedEmail },
     });
 
     if (!user) {

@@ -12,30 +12,30 @@ import { User } from '../../users/entities/user.entity';
 @Entity({ name: 'login_tokens' })
 export class LoginToken {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ unique: true })
   @Index()
-  code: string;
+  code!: string;
 
   @Column()
-  expiresAt: Date;
+  expiresAt!: Date;
 
   @Column({ nullable: true })
   consumedAt?: Date;
 
   @Column({ default: false })
-  revoked: boolean;
+  revoked!: boolean;
 
   @Column()
-  userId: string;
+  userId!: string;
 
   @ManyToOne(() => User, (user) => user.loginTokens, { onDelete: 'CASCADE' })
-  user: User;
+  user!: User;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

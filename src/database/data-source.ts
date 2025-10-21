@@ -14,5 +14,3 @@ export const AppDataSource = new DataSource({
   synchronize: false,
   logging: process.env.DATABASE_LOGGING === 'true'
 })
-
-export default AppDataSource

@@ -3,6 +3,15 @@
 /node_modules
 /build
 /tmp
+/coverage
+/data
+
+# IDEs
+.idea
+.vscode
+
+# TypeScript build info
+*.tsbuildinfo
 
 # Logs
 logs
@@ -15,6 +24,7 @@ lerna-debug.log*
 
 # dotenv environment variable files
 .env
+.env.local
 .env.development
 .env.test
 .env.production
