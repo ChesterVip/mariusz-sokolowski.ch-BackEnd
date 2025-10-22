@@ -279,7 +279,7 @@ export class MailjetService {
           null,
           null,
           'Zusammenfassung Ihrer Nachricht:',
-          'Mit freundlichen Grüßen,<br>Mariusz Sokołowski',
+          'Mit freundlichen Grüßen,<br>Mariusz Sokołowski<br><br><small style="color: #a0a0a0;">Haben Sie Fragen? Schreiben Sie an: <a href="mailto:kontakt@fgfalke.eu" style="color: #fdcb6e; text-decoration: none;">kontakt@fgfalke.eu</a></small>',
           'de',
           {
             subject: submission.subject,
@@ -301,7 +301,7 @@ export class MailjetService {
         null,
         null,
         'Podsumowanie Twojej wiadomości:',
-        'Z poważaniem,<br>Mariusz Sokołowski',
+        'Z poważaniem,<br>Mariusz Sokołowski<br><br><small style="color: #a0a0a0;">Masz pytania? Napisz na: <a href="mailto:kontakt@fgfalke.eu" style="color: #fdcb6e; text-decoration: none;">kontakt@fgfalke.eu</a></small>',
         'pl',
         {
           subject: submission.subject,
@@ -326,8 +326,8 @@ export class MailjetService {
           token,
           loginUrl,
           'Anmelden',
-          'Der Code ist 24 Stunden gültig.',
-          'Mit freundlichen Grüßen,<br>Mariusz Sokołowski',
+        'Der Code ist 24 Stunden gültig.',
+        'Mit freundlichen Grüßen,<br>Mariusz Sokołowski<br><br><small style="color: #a0a0a0;">Haben Sie Fragen? Schreiben Sie an: <a href="mailto:kontakt@fgfalke.eu" style="color: #fdcb6e; text-decoration: none;">kontakt@fgfalke.eu</a></small>',
           'de'
         )
       };
@@ -343,7 +343,7 @@ export class MailjetService {
         loginUrl,
         'Zaloguj się',
         'Kod jest ważny przez 24 godziny.',
-        'Z poważaniem,<br>Mariusz Sokołowski',
+        'Z poważaniem,<br>Mariusz Sokołowski<br><br><small style="color: #a0a0a0;">Masz pytania? Napisz na: <a href="mailto:kontakt@fgfalke.eu" style="color: #fdcb6e; text-decoration: none;">kontakt@fgfalke.eu</a></small>',
         'pl'
       )
     };

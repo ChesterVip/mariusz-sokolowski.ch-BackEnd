@@ -116,7 +116,7 @@ export class AuthService {
     validUntil?: Date;
     resentExistingToken?: boolean;
   }> {
-    const normalizedEmail = email.toLowerCase();
+    const normalizedEmail = this.normalizeEmail(email);
     let user = await this.usersRepository.findOne({
       where: { email: normalizedEmail },
     });
@@ -270,8 +270,9 @@ export class AuthService {
   }
 
   async verifyLoginCode(email: string, code: string): Promise<VerifyResult> {
+    const normalizedEmail = this.normalizeEmail(email);
     const user = await this.usersRepository.findOne({
-      where: { email: email.toLowerCase() },
+      where: { email: normalizedEmail },
     });
 
     if (!user) {
@@ -346,5 +347,9 @@ export class AuthService {
       code += randomInt(0, 10).toString();
     }
     return code;
+  }
+
+  private normalizeEmail(value: string): string {
+    return value.trim().toLowerCase();
   }
 }
