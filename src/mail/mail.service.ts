@@ -64,21 +64,42 @@ export class MailService {
   private readonly contactAcknowledgementEnabled: boolean;
 
   constructor(private readonly config: ConfigService) {
-    const host = this.config.get<string>('SMTP_HOST');
-    const port = this.config.get<number>('SMTP_PORT');
-    const user = this.config.get<string>('SMTP_USER');
-    const pass = this.config.get<string>('SMTP_PASSWORD');
+    const host = this.getFirstNonEmpty(['SMTP_HOST', 'MAIL_HOST']);
+    const port = this.getFirstNumber(['SMTP_PORT', 'MAIL_PORT']);
+    const user = this.getFirstNonEmpty(['SMTP_USER', 'MAIL_USER']);
+    const pass = this.getFirstNonEmpty([
+      'SMTP_PASSWORD',
+      'SMTP_PASS',
+      'MAIL_PASSWORD',
+      'MAIL_PASS',
+    ]);
+    const secure = this.getFirstBoolean(['SMTP_SECURE', 'MAIL_SECURE']);
 
     if (host && port && user && pass) {
       this.transporter = nodemailer.createTransport({
         host,
         port,
-        secure: port === 465,
+        secure: secure ?? port === 465,
         auth: { user, pass },
       });
     } else {
+      const missingParts: string[] = [];
+      if (!host) {
+        missingParts.push('SMTP_HOST/MAIL_HOST');
+      }
+      if (!port) {
+        missingParts.push('SMTP_PORT/MAIL_PORT');
+      }
+      if (!user) {
+        missingParts.push('SMTP_USER/MAIL_USER');
+      }
+      if (!pass) {
+        missingParts.push('SMTP_PASSWORD/SMTP_PASS/MAIL_PASSWORD/MAIL_PASS');
+      }
       this.logger.warn(
-        'SMTP credentials are not fully configured. Falling back to console output for emails.',
+        `SMTP credentials are not fully configured (missing: ${
+          missingParts.join(', ') || 'unknown'
+        }). Falling back to console output for emails.`,
       );
     }
 
@@ -404,5 +425,57 @@ export class MailService {
       default:
         return method;
     }
+  }
+
+  private getFirstNonEmpty(keys: string[]): string | undefined {
+    for (const key of keys) {
+      const rawValue = this.config.get<string | undefined>(key);
+      if (typeof rawValue === 'string') {
+        const trimmed = rawValue.trim();
+        if (trimmed.length > 0) {
+          return trimmed;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  private getFirstNumber(keys: string[]): number | undefined {
+    for (const key of keys) {
+      const rawValue = this.config.get<string | number | undefined>(key);
+      if (typeof rawValue === 'number' && !Number.isNaN(rawValue)) {
+        return rawValue;
+      }
+      if (typeof rawValue === 'string') {
+        const normalized = rawValue.trim();
+        if (normalized.length === 0) {
+          continue;
+        }
+        const parsed = Number(normalized);
+        if (!Number.isNaN(parsed)) {
+          return parsed;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  private getFirstBoolean(keys: string[]): boolean | undefined {
+    for (const key of keys) {
+      const rawValue = this.config.get<string | boolean | undefined>(key);
+      if (typeof rawValue === 'boolean') {
+        return rawValue;
+      }
+      if (typeof rawValue === 'string') {
+        const normalized = rawValue.trim().toLowerCase();
+        if (['true', '1', 'yes', 'on'].includes(normalized)) {
+          return true;
+        }
+        if (['false', '0', 'no', 'off'].includes(normalized)) {
+          return false;
+        }
+      }
+    }
+    return undefined;
   }
 }
