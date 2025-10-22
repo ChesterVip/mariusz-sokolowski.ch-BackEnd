@@ -9,6 +9,8 @@ export interface MailjetEmailData {
   textContent?: string;
   fromName?: string;
   fromEmail?: string;
+  replyToEmail?: string;
+  replyToName?: string;
 }
 
 @Injectable()
@@ -21,9 +23,26 @@ export class MailjetService {
   constructor(private readonly config: ConfigService) {
     const apiKey = this.config.get<string>('MAILJET_API_KEY');
     const apiSecret = this.config.get<string>('MAILJET_API_SECRET');
-    
-    this.fromEmail = this.config.get<string>('MAILJET_FROM_EMAIL') || 'no-reply@mariusz-sokolowski.ch';
-    this.fromName = this.config.get<string>('MAILJET_FROM_NAME') || 'Mariusz Sokołowski';
+
+    const defaultEmail = 'info@mariusz-sokolowski.ch';
+    const defaultName = 'Mariusz Sokołowski';
+    const configuredFrom = this.parseAddress(this.config.get<string>('MAILJET_FROM_EMAIL'));
+    const configuredName = this.config.get<string>('MAILJET_FROM_NAME')?.trim();
+
+    if (configuredFrom?.raw && configuredFrom.warn) {
+      this.logger.warn(
+        `MAILJET_FROM_EMAIL value "${configuredFrom.raw}" is not a valid email address. Falling back to ${defaultEmail}.`,
+      );
+    } else if (configuredFrom?.raw && configuredFrom.nameExtracted) {
+      this.logger.log(
+        `Extracted sender name "${configuredFrom.nameExtracted}" and email "${configuredFrom.email}" from MAILJET_FROM_EMAIL value.`,
+      );
+    }
+
+    this.fromEmail = configuredFrom?.email ?? defaultEmail;
+    this.fromName = configuredName?.length
+      ? configuredName
+      : configuredFrom?.name ?? defaultName;
 
     if (!apiKey || !apiSecret) {
       this.logger.warn('Mailjet credentials not configured. Email sending will be disabled.');
@@ -46,12 +65,21 @@ export class MailjetService {
     }
 
     try {
+      const fromEmail = this.resolveEmail(data.fromEmail, this.fromEmail, 'From');
+      const fromName = data.fromName?.trim().length ? data.fromName.trim() : this.fromName;
+      const replyToEmail = this.resolveEmail(data.replyToEmail, fromEmail, 'Reply-To');
+      const replyToName = data.replyToName?.trim().length ? data.replyToName.trim() : fromName;
+
       const request = this.mailjet.post('send', { version: 'v3.1' }).request({
         Messages: [
           {
             From: {
-              Email: this.fromEmail,
-              Name: this.fromName,
+              Email: fromEmail, // nadawca zautoryzowany w Mailjet
+              Name: fromName,
+            },
+            ReplyTo: {
+              Email: replyToEmail,
+              Name: replyToName,
             },
             To: [
               {
@@ -127,6 +155,96 @@ export class MailjetService {
       subject,
       htmlContent,
     });
+  }
+
+  private resolveEmail(candidate: string | undefined, fallback: string, label: string): string {
+    if (!candidate) {
+      return fallback;
+    }
+
+    const parsed = this.parseAddress(candidate);
+    if (!parsed?.email) {
+      this.logger.warn(
+        `${label} email "${candidate}" is invalid. Using fallback address ${fallback}.`,
+      );
+      return fallback;
+    }
+
+    return parsed.email;
+  }
+
+  private parseAddress(
+    value: string | undefined | null,
+  ): { email?: string; name?: string; raw: string; warn?: boolean; nameExtracted?: string } | null {
+    if (!value) {
+      return null;
+    }
+
+    const raw = value.trim();
+    if (!raw) {
+      return null;
+    }
+
+    const angleMatch = raw.match(/^([^<]+)?<([^>]+)>$/);
+    if (angleMatch) {
+      const nameCandidate = this.sanitizeName(angleMatch[1]);
+      const emailCandidate = angleMatch[2].trim();
+      if (!this.isValidEmail(emailCandidate)) {
+        return { raw, warn: true };
+      }
+      return {
+        raw,
+        email: emailCandidate,
+        name: nameCandidate ?? undefined,
+        nameExtracted: nameCandidate ?? undefined,
+      };
+    }
+
+    const simpleEmail = raw.replace(/^"(.*)"$/, '$1').trim();
+    if (this.isValidEmail(simpleEmail)) {
+      return { raw, email: simpleEmail };
+    }
+
+    const emailPattern = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
+    const emailMatch = raw.match(emailPattern);
+    if (emailMatch) {
+      const emailCandidate = emailMatch[0].trim();
+      if (!this.isValidEmail(emailCandidate)) {
+        return { raw, warn: true };
+      }
+
+      const before = raw.slice(0, emailMatch.index ?? 0).trim();
+      const afterIndex = (emailMatch.index ?? 0) + emailMatch[0].length;
+      const after = raw.slice(afterIndex).trim();
+      const nameCandidate = this.sanitizeName([before, after].filter(Boolean).join(' '));
+
+      return {
+        raw,
+        email: emailCandidate,
+        name: nameCandidate ?? undefined,
+        nameExtracted: nameCandidate ?? undefined,
+      };
+    }
+
+    return { raw, warn: true };
+  }
+
+  private sanitizeName(value: string | undefined | null): string | null {
+    if (!value) {
+      return null;
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    const withoutQuotes = trimmed.replace(/^"(.*)"$/, '$1').trim();
+    return withoutQuotes.length ? withoutQuotes : null;
+  }
+
+  private isValidEmail(value: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   }
 
   private detectLanguage(submission: any): string {
