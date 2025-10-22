@@ -30,8 +30,7 @@ COPY --from=build /app/dist ./dist
 # Render ustawia PORT — upewnij się, że Nest go czyta (process.env.PORT)
 EXPOSE 3000
 
-COPY docker-entrypoint.sh ./docker-entrypoint.sh
-RUN chmod +x ./docker-entrypoint.sh
-
-ENTRYPOINT ["./docker-entrypoint.sh"]
+# start:prod powinien robić "node dist/main.js"; jeśli tak, możesz użyć jednej z komend poniżej:
 CMD ["node", "dist/main.js"]
+# albo:
+# CMD ["npm", "run", "start:prod"]

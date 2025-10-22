@@ -9,11 +9,16 @@ export class SecureController {
   @Get('contact')
   @UseGuards(AuthGuard('jwt'))
   getContact() {
+    const getString = (key: string, fallback: string) => {
+      const value = this.config.get<string>(key)?.trim();
+      return value && value.length > 0 ? value : fallback;
+    };
+
     return {
-      email: this.config.get<string>('CONTACT_EMAIL'),
-      phone: this.config.get<string>('CONTACT_PHONE'),
-      whatsapp: this.config.get<string>('CONTACT_WHATSAPP'),
-      facebook: this.config.get<string>('CONTACT_FACEBOOK'),
+      email: getString('CONTACT_EMAIL', 'kontakt@mariusz-sokolowski.ch'),
+      phone: getString('CONTACT_PHONE', '+41 76 237 33 01'),
+      whatsapp: getString('CONTACT_WHATSAPP', '+41 76 237 33 01'),
+      facebook: getString('CONTACT_FACEBOOK', 'https://www.facebook.com/mariusz.sokolowski.94'),
     };
   }
 }
