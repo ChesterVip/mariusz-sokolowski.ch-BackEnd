@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
+import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 interface SendLoginTokenOptions {
   to: string;
@@ -74,14 +75,69 @@ export class MailService {
       'MAIL_PASS',
     ]);
     const secure = this.getFirstBoolean(['SMTP_SECURE', 'MAIL_SECURE']);
+    const requireTls = this.getFirstBoolean(['SMTP_REQUIRE_TLS', 'MAIL_REQUIRE_TLS']);
+    const ignoreTls = this.getFirstBoolean(['SMTP_IGNORE_TLS', 'MAIL_IGNORE_TLS']);
+    const connectionTimeout = this.getFirstNumber([
+      'SMTP_CONNECTION_TIMEOUT',
+      'MAIL_CONNECTION_TIMEOUT',
+    ]);
+    const greetingTimeout = this.getFirstNumber([
+      'SMTP_GREETING_TIMEOUT',
+      'MAIL_GREETING_TIMEOUT',
+    ]);
+    const socketTimeout = this.getFirstNumber([
+      'SMTP_SOCKET_TIMEOUT',
+      'MAIL_SOCKET_TIMEOUT',
+    ]);
+
+    let resolvedSecure = secure ?? (port === 465 ? true : undefined);
+    if (resolvedSecure === undefined) {
+      resolvedSecure = port === 465;
+    }
+    if (port === 465 && resolvedSecure === false) {
+      this.logger.warn(
+        'Port 465 (implicit TLS) wymaga połączenia szyfrowanego. Wymuszam secure=true. Ustaw MAIL_SECURE=true albo zmień port na 587.',
+      );
+      resolvedSecure = true;
+    }
 
     if (host && port && user && pass) {
-      this.transporter = nodemailer.createTransport({
+      const transportOptions: SMTPTransport.Options = {
         host,
         port,
-        secure: secure ?? port === 465,
+        secure: resolvedSecure,
         auth: { user, pass },
-      });
+      };
+
+      if (requireTls !== undefined) {
+        transportOptions.requireTLS = requireTls;
+      }
+      if (ignoreTls !== undefined) {
+        transportOptions.ignoreTLS = ignoreTls;
+      }
+      if (connectionTimeout !== undefined) {
+        transportOptions.connectionTimeout = connectionTimeout;
+      }
+      if (greetingTimeout !== undefined) {
+        transportOptions.greetingTimeout = greetingTimeout;
+      }
+      if (socketTimeout !== undefined) {
+        transportOptions.socketTimeout = socketTimeout;
+      }
+
+      this.transporter = nodemailer.createTransport(transportOptions);
+      this.logger.log(
+        `SMTP transporter configured (host=${host}, port=${port}, secure=${resolvedSecure}, ` +
+          `requireTLS=${
+            transportOptions.requireTLS !== undefined ? transportOptions.requireTLS : 'auto'
+          }, ignoreTLS=${
+            transportOptions.ignoreTLS !== undefined ? transportOptions.ignoreTLS : 'auto'
+          }, timeouts(ms)={connection=${
+            transportOptions.connectionTimeout ?? 'auto'
+          }, greeting=${transportOptions.greetingTimeout ?? 'auto'}, socket=${
+            transportOptions.socketTimeout ?? 'auto'
+          }})`,
+      );
     } else {
       const missingParts: string[] = [];
       if (!host) {
@@ -140,12 +196,19 @@ export class MailService {
     });
 
     if (this.transporter) {
-      await this.transporter.sendMail({
-        from,
-        to: options.to,
-        subject,
-        html,
-      });
+      try {
+        await this.transporter.sendMail({
+          from,
+          to: options.to,
+          subject,
+          html,
+        });
+      } catch (error) {
+        this.logger.error(
+          `Failed to send login token email to ${options.to}: ${this.describeMailerError(error)}`,
+        );
+        throw error;
+      }
     } else {
       const logParts = [
         `Login code for ${options.to}`,
@@ -219,12 +282,21 @@ export class MailService {
     `;
 
     if (this.transporter) {
-      await this.transporter.sendMail({
-        from,
-        to: this.adminRecipient,
-        subject,
-        html,
-      });
+      try {
+        await this.transporter.sendMail({
+          from,
+          to: this.adminRecipient,
+          subject,
+          html,
+        });
+      } catch (error) {
+        this.logger.error(
+          `Failed to send access notification to ${this.adminRecipient}: ${this.describeMailerError(
+            error,
+          )}`,
+        );
+        throw error;
+      }
     } else {
       this.logger.log(
         `Access request notification -> ${this.adminRecipient}: ${JSON.stringify(options)}`,
@@ -256,13 +328,22 @@ export class MailService {
     `;
 
     if (this.transporter) {
-      await this.transporter.sendMail({
-        from,
-        to: this.contactFormRecipient,
-        subject: `Nowa wiadomość z formularza: ${submission.subject}`,
-        replyTo: submission.email,
-        html,
-      });
+      try {
+        await this.transporter.sendMail({
+          from,
+          to: this.contactFormRecipient,
+          subject: `Nowa wiadomość z formularza: ${submission.subject}`,
+          replyTo: submission.email,
+          html,
+        });
+      } catch (error) {
+        this.logger.error(
+          `Failed to send contact form notification to ${this.contactFormRecipient}: ${this.describeMailerError(
+            error,
+          )}`,
+        );
+        throw error;
+      }
     } else {
       this.logger.log(
         `Contact form notification -> ${this.contactFormRecipient}: ${JSON.stringify(submission)}`,
@@ -284,12 +365,21 @@ export class MailService {
     `;
 
     if (this.transporter) {
-      await this.transporter.sendMail({
-        from,
-        to: submission.email,
-        subject: 'Dziękujemy za wiadomość',
-        html,
-      });
+      try {
+        await this.transporter.sendMail({
+          from,
+          to: submission.email,
+          subject: 'Dziękujemy za wiadomość',
+          html,
+        });
+      } catch (error) {
+        this.logger.error(
+          `Failed to send contact acknowledgement to ${submission.email}: ${this.describeMailerError(
+            error,
+          )}`,
+        );
+        throw error;
+      }
     } else {
       this.logger.log(
         `Contact form acknowledgement (console) -> ${submission.email}: ${submission.subject}`,
@@ -425,6 +515,13 @@ export class MailService {
       default:
         return method;
     }
+  }
+
+  private describeMailerError(error: unknown): string {
+    if (error instanceof Error) {
+      return `${error.name}: ${error.message}`;
+    }
+    return 'Unknown error';
   }
 
   private getFirstNonEmpty(keys: string[]): string | undefined {
