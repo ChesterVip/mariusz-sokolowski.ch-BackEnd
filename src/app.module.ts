@@ -10,6 +10,7 @@ import { MailModule } from './mail/mail.module';
 import { SecureModule } from './secure/secure.module';
 import { HealthModule } from './health/health.module';
 import { UsersModule } from './users/users.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -50,7 +51,7 @@ import { UsersModule } from './users/users.module';
     HealthModule,
     ContactModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [
     {
       provide: APP_GUARD,
