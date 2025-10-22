@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
+import { MailjetService } from './mailjet.service';
 
 interface SendLoginTokenOptions {
   to: string;
@@ -63,8 +64,12 @@ export class MailService {
   private readonly adminRecipient: string;
   private readonly contactFormRecipient: string;
   private readonly contactAcknowledgementEnabled: boolean;
+  private readonly useMailjet: boolean;
 
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly config: ConfigService,
+    private readonly mailjetService: MailjetService,
+  ) {
     const host = this.getFirstNonEmpty(['SMTP_HOST', 'MAIL_HOST']);
     const port = this.getFirstNumber(['SMTP_PORT', 'MAIL_PORT']);
     const user = this.getFirstNonEmpty(['SMTP_USER', 'MAIL_USER']);
@@ -177,9 +182,32 @@ export class MailService {
 
     this.contactAcknowledgementEnabled =
       this.config.get<string>('CONTACT_FORM_SEND_ACK', 'true') !== 'false';
+
+    // Decide whether to use Mailjet or SMTP
+    this.useMailjet = this.config.get<string>('USE_MAILJET', 'false') === 'true' || 
+                     this.config.get<string>('NODE_ENV') === 'production';
+    
+    if (this.useMailjet) {
+      this.logger.log('Using Mailjet for email sending');
+    } else {
+      this.logger.log('Using SMTP for email sending');
+    }
   }
 
   async sendLoginTokenEmail(options: SendLoginTokenOptions): Promise<void> {
+    if (this.useMailjet) {
+      try {
+        const success = await this.mailjetService.sendLoginTokenEmail(options.to, options.code);
+        if (!success) {
+          throw new Error('Failed to send email via Mailjet');
+        }
+        return;
+      } catch (error) {
+        this.logger.error(`Failed to send login token email via Mailjet to ${options.to}: ${this.describeMailerError(error)}`);
+        throw error;
+      }
+    }
+
     const from = this.config.get<string>('MAIL_FROM', 'no-reply@mariusz-sokolowski.ch');
     const refreshUrl =
       options.refreshUrl ?? this.config.get<string>('LOGIN_REFRESH_URL', '').trim();
@@ -305,6 +333,19 @@ export class MailService {
   }
 
   async sendContactFormNotification(submission: ContactFormSubmission): Promise<void> {
+    if (this.useMailjet) {
+      try {
+        const success = await this.mailjetService.sendContactFormNotification(submission);
+        if (!success) {
+          throw new Error('Failed to send contact form notification via Mailjet');
+        }
+        return;
+      } catch (error) {
+        this.logger.error(`Failed to send contact form notification via Mailjet: ${this.describeMailerError(error)}`);
+        throw error;
+      }
+    }
+
     const from = this.config.get<string>('MAIL_FROM', 'no-reply@mariusz-sokolowski.ch');
     const preferredContactLabel = this.getPreferredContactLabel(submission.preferredContact);
     const html = `
@@ -354,6 +395,19 @@ export class MailService {
   async sendContactFormAcknowledgement(submission: ContactFormSubmission): Promise<void> {
     if (!this.contactAcknowledgementEnabled) {
       return;
+    }
+
+    if (this.useMailjet) {
+      try {
+        const success = await this.mailjetService.sendContactFormAcknowledgement(submission);
+        if (!success) {
+          throw new Error('Failed to send contact form acknowledgement via Mailjet');
+        }
+        return;
+      } catch (error) {
+        this.logger.error(`Failed to send contact form acknowledgement via Mailjet: ${this.describeMailerError(error)}`);
+        throw error;
+      }
     }
 
     const from = this.config.get<string>('MAIL_FROM', 'no-reply@mariusz-sokolowski.ch');
