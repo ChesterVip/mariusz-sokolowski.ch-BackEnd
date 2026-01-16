@@ -1,7 +1,8 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { Request } from 'express';
-import { AuthService } from './auth.service';
+import { AuthGuard } from '@nestjs/passport';
+import { Request, Response } from 'express';
+import { AuthService, OAuthUser } from './auth.service';
 import { RequestLoginCodeDto } from './dto/request-login-code.dto';
 import { VerifyLoginCodeDto } from './dto/verify-login-code.dto';
 
@@ -85,5 +86,82 @@ export class AuthController {
       return geoCountry.toUpperCase();
     }
     return undefined;
+  }
+
+  // OAuth Google
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(@Req() req: Request) {
+    // Przekierowanie do Google
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    const oauthUser = req.user as OAuthUser;
+    const result = await this.authService.validateOAuthLogin(oauthUser);
+
+    // Przekieruj do frontendu z tokenem
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(
+      `${frontendUrl}/auth/callback?token=${result.accessToken}&email=${result.user.email}`,
+    );
+  }
+
+  // OAuth Facebook
+  @Get('facebook')
+  @UseGuards(AuthGuard('facebook'))
+  async facebookAuth(@Req() req: Request) {
+    // Przekierowanie do Facebook
+  }
+
+  @Get('facebook/callback')
+  @UseGuards(AuthGuard('facebook'))
+  async facebookAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    const oauthUser = req.user as OAuthUser;
+    const result = await this.authService.validateOAuthLogin(oauthUser);
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(
+      `${frontendUrl}/auth/callback?token=${result.accessToken}&email=${result.user.email}`,
+    );
+  }
+
+  // OAuth Apple
+  @Get('apple')
+  @UseGuards(AuthGuard('apple'))
+  async appleAuth(@Req() req: Request) {
+    // Przekierowanie do Apple
+  }
+
+  @Get('apple/callback')
+  @UseGuards(AuthGuard('apple'))
+  async appleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    const oauthUser = req.user as OAuthUser;
+    const result = await this.authService.validateOAuthLogin(oauthUser);
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(
+      `${frontendUrl}/auth/callback?token=${result.accessToken}&email=${result.user.email}`,
+    );
+  }
+
+  // Auth0 Universal Login
+  @Get('auth0')
+  @UseGuards(AuthGuard('auth0'))
+  async auth0Login(@Req() req: Request) {
+    // Przekierowanie do Auth0 Universal Login
+  }
+
+  @Get('auth0/callback')
+  @UseGuards(AuthGuard('auth0'))
+  async auth0Callback(@Req() req: Request, @Res() res: Response) {
+    const oauthUser = req.user as OAuthUser;
+    const result = await this.authService.validateOAuthLogin(oauthUser);
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(
+      `${frontendUrl}/auth/callback?token=${result.accessToken}&email=${result.user.email}`,
+    );
   }
 }

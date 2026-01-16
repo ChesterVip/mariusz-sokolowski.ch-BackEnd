@@ -49,6 +49,16 @@ export interface VerifyResult {
   };
 }
 
+export interface OAuthUser {
+  provider: string;
+  providerId: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  picture?: string;
+  accessToken: string;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -351,5 +361,68 @@ export class AuthService {
 
   private normalizeEmail(value: string): string {
     return value.trim().toLowerCase();
+  }
+
+  async validateOAuthLogin(oauthUser: OAuthUser): Promise<VerifyResult> {
+    const normalizedEmail = this.normalizeEmail(oauthUser.email);
+
+    let user = await this.usersRepository.findOne({
+      where: { email: normalizedEmail },
+    });
+
+    // Jeśli użytkownik nie istnieje, utwórz go
+    if (!user) {
+      user = this.usersRepository.create({
+        email: normalizedEmail,
+        firstName: oauthUser.firstName,
+        lastName: oauthUser.lastName,
+        preferredLanguage: 'pl',
+      });
+      user = await this.usersRepository.save(user);
+      this.logger.log(
+        `Created new user via ${oauthUser.provider} OAuth: ${normalizedEmail}`,
+      );
+    } else {
+      // Zaktualizuj dane użytkownika jeśli się zmieniły
+      const updates: Partial<User> = {};
+
+      if (oauthUser.firstName && oauthUser.firstName !== user.firstName) {
+        updates.firstName = oauthUser.firstName;
+      }
+
+      if (oauthUser.lastName && oauthUser.lastName !== user.lastName) {
+        updates.lastName = oauthUser.lastName;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await this.usersRepository.update(user.id, updates);
+        user = { ...user, ...updates };
+        this.logger.log(
+          `Updated user profile via ${oauthUser.provider} OAuth: ${normalizedEmail}`,
+        );
+      }
+    }
+
+    // Wygeneruj JWT token
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+    };
+
+    const expiresIn = Math.floor(this.tokenTtlMs / 1000);
+    const accessToken = await this.jwtService.signAsync(payload, {
+      expiresIn,
+    });
+
+    return {
+      accessToken,
+      expiresAt: new Date(Date.now() + this.tokenTtlMs),
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+    };
   }
 }

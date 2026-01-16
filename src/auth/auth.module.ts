@@ -9,6 +9,10 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { LoginToken } from './entities/login-token.entity';
 import { JwtStrategy } from './jwt.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { FacebookStrategy } from './strategies/facebook.strategy';
+import { AppleStrategy } from './strategies/apple.strategy';
+import { Auth0Strategy } from './strategies/auth0.strategy';
 
 @Module({
   imports: [
@@ -27,7 +31,7 @@ import { JwtStrategy } from './jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, Auth0Strategy, GoogleStrategy, FacebookStrategy, AppleStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}
