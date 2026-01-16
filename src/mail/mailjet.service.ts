@@ -279,7 +279,7 @@ export class MailjetService {
           null,
           null,
           'Zusammenfassung Ihrer Nachricht:',
-          'Mit freundlichen Grüßen,<br>Mariusz Sokołowski<br><br><small style="color: #a0a0a0;">Haben Sie Fragen? Schreiben Sie an: <a href="mailto:kontakt@fgfalke.eu" style="color: #fdcb6e; text-decoration: none;">kontakt@fgfalke.eu</a></small>',
+          'Mit freundlichen Grüßen,<br>Mariusz Sokołowski<br><br><small style="color: #9ca3af;">Haben Sie Fragen? Schreiben Sie an: <a href="mailto:kontakt@fgfalke.eu" style="color: #cfd5df; text-decoration: none;">kontakt@fgfalke.eu</a></small>',
           'de',
           {
             subject: submission.subject,
@@ -301,7 +301,7 @@ export class MailjetService {
         null,
         null,
         'Podsumowanie Twojej wiadomości:',
-        'Z poważaniem,<br>Mariusz Sokołowski<br><br><small style="color: #a0a0a0;">Masz pytania? Napisz na: <a href="mailto:kontakt@fgfalke.eu" style="color: #fdcb6e; text-decoration: none;">kontakt@fgfalke.eu</a></small>',
+        'Z poważaniem,<br>Mariusz Sokołowski<br><br><small style="color: #9ca3af;">Masz pytania? Napisz na: <a href="mailto:kontakt@fgfalke.eu" style="color: #cfd5df; text-decoration: none;">kontakt@fgfalke.eu</a></small>',
         'pl',
         {
           subject: submission.subject,
@@ -327,7 +327,7 @@ export class MailjetService {
           loginUrl,
           'Anmelden',
         'Der Code ist 24 Stunden gültig.',
-        'Mit freundlichen Grüßen,<br>Mariusz Sokołowski<br><br><small style="color: #a0a0a0;">Haben Sie Fragen? Schreiben Sie an: <a href="mailto:kontakt@fgfalke.eu" style="color: #fdcb6e; text-decoration: none;">kontakt@fgfalke.eu</a></small>',
+        'Mit freundlichen Grüßen,<br>Mariusz Sokołowski<br><br><small style="color: #9ca3af;">Haben Sie Fragen? Schreiben Sie an: <a href="mailto:kontakt@fgfalke.eu" style="color: #cfd5df; text-decoration: none;">kontakt@fgfalke.eu</a></small>',
           'de'
         )
       };
@@ -343,7 +343,7 @@ export class MailjetService {
         loginUrl,
         'Zaloguj się',
         'Kod jest ważny przez 24 godziny.',
-        'Z poważaniem,<br>Mariusz Sokołowski<br><br><small style="color: #a0a0a0;">Masz pytania? Napisz na: <a href="mailto:kontakt@fgfalke.eu" style="color: #fdcb6e; text-decoration: none;">kontakt@fgfalke.eu</a></small>',
+        'Z poważaniem,<br>Mariusz Sokołowski<br><br><small style="color: #9ca3af;">Masz pytania? Napisz na: <a href="mailto:kontakt@fgfalke.eu" style="color: #cfd5df; text-decoration: none;">kontakt@fgfalke.eu</a></small>',
         'pl'
       )
     };
@@ -415,7 +415,7 @@ export class MailjetService {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${title}</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
         <style>
           * {
             margin: 0;
@@ -424,14 +424,16 @@ export class MailjetService {
           }
           
           body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Space Grotesk', Inter, system-ui, -apple-system, sans-serif;
             line-height: 1.6;
-            color: #ffffff;
-            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+            letter-spacing: 0.01em;
+            color: #e8ecf1;
+            background: linear-gradient(180deg, #0c1118 0%, #080c13 85%, #070a11 100%);
             margin: 0;
             padding: 20px;
             direction: ${isRTL ? 'rtl' : 'ltr'};
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
           }
           
           /* Tech Grid Background */
@@ -442,8 +444,8 @@ export class MailjetService {
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: radial-gradient(circle at 2px 2px, rgba(253, 203, 110, 0.1) 1px, transparent 0);
-            background-size: 40px 40px;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+            background-size: 52px 52px;
             pointer-events: none;
             z-index: -1;
           }
@@ -451,14 +453,13 @@ export class MailjetService {
           .container {
             max-width: 600px;
             margin: 0 auto;
-            background: rgba(26, 26, 26, 0.8);
+            background: #0f141c;
             backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid rgba(253, 203, 110, 0.2);
+            border-radius: 18px;
+            border: 1px solid #1f2634;
             box-shadow: 
-              0 25px 50px -12px rgba(0, 0, 0, 0.5),
-              0 0 0 1px rgba(253, 203, 110, 0.1),
-              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+              0 18px 40px rgba(0, 0, 0, 0.25),
+              inset 0 1px 0 rgba(255, 255, 255, 0.08);
             overflow: hidden;
             position: relative;
           }
@@ -470,15 +471,15 @@ export class MailjetService {
             left: 0;
             right: 0;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(253, 203, 110, 0.5), transparent);
+            background: linear-gradient(90deg, transparent, rgba(231, 234, 239, 0.3), transparent);
           }
           
           .header {
-            background: linear-gradient(135deg, rgba(253, 203, 110, 0.1) 0%, rgba(225, 112, 85, 0.1) 100%);
+            background: linear-gradient(135deg, rgba(231, 234, 239, 0.05) 0%, rgba(207, 213, 223, 0.03) 100%);
             padding: 40px 30px;
             text-align: center;
             position: relative;
-            border-bottom: 1px solid rgba(253, 203, 110, 0.2);
+            border-bottom: 1px solid #1f2634;
           }
           
           .header::before {
@@ -488,7 +489,7 @@ export class MailjetService {
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at center, rgba(253, 203, 110, 0.05) 0%, transparent 70%);
+            background: radial-gradient(circle at center, rgba(231, 234, 239, 0.03) 0%, transparent 70%);
             pointer-events: none;
           }
           
@@ -496,11 +497,10 @@ export class MailjetService {
             margin: 0;
             font-size: 32px;
             font-weight: 700;
-            background: linear-gradient(135deg, #fdcb6e 0%, #e17055 50%, #d63031 100%);
+            background: linear-gradient(90deg, #f5f7fb 0%, #cfd5df 50%, #9aa5b5 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 30px rgba(253, 203, 110, 0.3);
             position: relative;
             z-index: 1;
           }
@@ -514,21 +514,21 @@ export class MailjetService {
           .greeting {
             font-size: 20px;
             margin-bottom: 25px;
-            color: #fdcb6e;
-            font-weight: 500;
+            color: #cfd5df;
+            font-weight: 600;
           }
           
           .message {
             font-size: 16px;
             margin-bottom: 35px;
-            color: #e5e5e5;
+            color: #e8ecf1;
             line-height: 1.7;
           }
           
           .token-container {
-            background: rgba(12, 12, 12, 0.6);
-            border: 2px solid rgba(253, 203, 110, 0.3);
-            border-radius: 16px;
+            background: #0c111a;
+            border: 1px solid #1f2634;
+            border-radius: 18px;
             padding: 30px;
             text-align: center;
             margin: 35px 0;
@@ -538,13 +538,13 @@ export class MailjetService {
           
           .token-glow {
             position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #fdcb6e, #e17055, #d63031, #fdcb6e);
-            border-radius: 16px;
-            opacity: 0.3;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            background: linear-gradient(45deg, #e7eaef, #cfd5df, #9aa5b5, #e7eaef);
+            border-radius: 18px;
+            opacity: 0.15;
             animation: rotate 3s linear infinite;
             z-index: -1;
           }
@@ -555,19 +555,18 @@ export class MailjetService {
             left: 0;
             right: 0;
             bottom: 0;
-            border-radius: 14px;
-            background: rgba(12, 12, 12, 0.8);
+            border-radius: 17px;
+            background: #0c111a;
             z-index: 0;
           }
           
           .token {
             font-size: 36px;
             font-weight: 700;
-            color: #fdcb6e;
+            color: #e7eaef;
             letter-spacing: 6px;
             font-family: 'Courier New', monospace;
             margin: 0;
-            text-shadow: 0 0 20px rgba(253, 203, 110, 0.5);
             position: relative;
             z-index: 1;
           }
@@ -579,8 +578,8 @@ export class MailjetService {
           
           .button {
             display: inline-block;
-            background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
-            color: #0c0c0c;
+            background: linear-gradient(90deg, #e7eaef 0%, #cfd5df 100%);
+            color: #0b0f16;
             padding: 18px 40px;
             text-decoration: none;
             border-radius: 12px;
@@ -588,10 +587,8 @@ export class MailjetService {
             font-size: 16px;
             position: relative;
             overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 
-              0 10px 25px -5px rgba(253, 203, 110, 0.4),
-              0 0 0 1px rgba(253, 203, 110, 0.2);
+            transition: all 0.24s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
           }
           
           .button-glow {
@@ -605,10 +602,8 @@ export class MailjetService {
           }
           
           .button:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 
-              0 20px 40px -10px rgba(253, 203, 110, 0.6),
-              0 0 0 1px rgba(253, 203, 110, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
           }
           
           .button:hover .button-glow {
@@ -621,11 +616,11 @@ export class MailjetService {
           }
           
           .summary-container {
-            background: rgba(26, 26, 26, 0.6);
-            border-radius: 16px;
+            background: #0f141c;
+            border-radius: 18px;
             padding: 25px;
             margin: 25px 0;
-            border: 1px solid rgba(253, 203, 110, 0.2);
+            border: 1px solid #1f2634;
             position: relative;
           }
           
@@ -638,7 +633,7 @@ export class MailjetService {
           
           .summary-container h3 {
             margin: 0;
-            color: #fdcb6e;
+            color: #cfd5df;
             font-size: 20px;
             font-weight: 600;
           }
@@ -655,10 +650,10 @@ export class MailjetService {
           }
           
           .summary-item {
-            background: rgba(12, 12, 12, 0.4);
+            background: #0c111a;
             padding: 15px;
-            border-radius: 10px;
-            border: 1px solid rgba(253, 203, 110, 0.1);
+            border-radius: 12px;
+            border: 1px solid #1f2634;
           }
           
           .summary-item.full-width {
@@ -667,7 +662,7 @@ export class MailjetService {
           
           .summary-label {
             font-size: 12px;
-            color: #a0a0a0;
+            color: #9ca3af;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 5px;
@@ -675,43 +670,43 @@ export class MailjetService {
           }
           
           .summary-value {
-            color: #ffffff;
+            color: #e8ecf1;
             font-weight: 500;
           }
           
           .priority-high {
-            color: #d63031;
+            color: #ef4444;
             font-weight: 600;
           }
           
           .priority-medium {
-            color: #e17055;
+            color: #f59e0b;
             font-weight: 600;
           }
           
           .priority-low {
-            color: #fdcb6e;
+            color: #cfd5df;
             font-weight: 600;
           }
           
           .message-content {
-            background: rgba(12, 12, 12, 0.6);
+            background: #0c111a;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 12px;
             margin-top: 8px;
             white-space: pre-wrap;
-            border: 1px solid rgba(253, 203, 110, 0.1);
-            color: #e5e5e5;
+            border: 1px solid #1f2634;
+            color: #e8ecf1;
             line-height: 1.6;
           }
           
           .footer {
-            background: rgba(12, 12, 12, 0.8);
+            background: #0c1118;
             padding: 25px 30px;
             text-align: center;
-            color: #a0a0a0;
+            color: #9ca3af;
             font-size: 14px;
-            border-top: 1px solid rgba(253, 203, 110, 0.2);
+            border-top: 1px solid #1f2634;
             position: relative;
           }
           
@@ -723,19 +718,19 @@ export class MailjetService {
             transform: translateX(-50%);
             width: 60px;
             height: 1px;
-            background: linear-gradient(90deg, transparent, #fdcb6e, transparent);
+            background: linear-gradient(90deg, transparent, #cfd5df, transparent);
           }
           
           .signature {
             margin-top: 15px;
             font-style: italic;
-            color: #fdcb6e;
+            color: #cfd5df;
             font-weight: 500;
           }
           
           .divider {
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(253, 203, 110, 0.3), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
             margin: 25px 0;
           }
           
